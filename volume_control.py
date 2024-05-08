@@ -2,6 +2,8 @@ import cv2
 import mediapipe as mp
 import pyautogui
 
+x1 = y1 = x2 = y2 = 0
+
 # To open webcam
 webcam = cv2.VideoCapture(0)
 
@@ -12,6 +14,8 @@ drawing_utils = mp.solutions.drawing_utils
 # To show the captured image
 while True:
     _ , image =webcam.read()
+    image = cv2.flip(image,1)
+    
 
     frame_height , frame_width, _ = image.shape
 
@@ -28,9 +32,23 @@ while True:
                 y=int(landmark.y * frame_height)
                 if id == 8: #To identify forefinger
                     cv2.circle(img=image,center=(x,y),radius=8,color=(0,255,255),thickness=3) #To draw circle
+                    # To save the points after drawing circle
+                    x1 = x
+                    y1 = y 
 
                 if id == 4: #To identify thumbfinger
                     cv2.circle(img=image,center=(x,y),radius=8,color=(0,0,255),thickness=3)  #To draw circle
+                    # To save the points after drawing circle
+                    x2 = x
+                    y2 = y 
+        dist = ((x2-x1)**2 + (y2-y1)**2)**(0.5)//4
+
+        cv2.line(image,(x1,y1),(x2,y2),(0,255,0),5)
+
+        if dist > 50 :
+            pyautogui.press("VolumeUp")
+        else:
+            pyautogui.press("volumedown")    
 
     cv2.imshow("Hand Volume control using python",image)        
     key = cv2.waitKey(10)
